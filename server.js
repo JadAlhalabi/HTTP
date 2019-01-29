@@ -1,15 +1,15 @@
 const http = require("http");
 const StringDecoder = require("string_decoder").StringDecoder;
-const posts = require("./posts")
+const posts = require("./posts");
 
 const httpServer = http.createServer((request, response) => {
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Request-Methods', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
-  response.setHeader('Access-Control-Allow-Headers', '*');
-  if (request.method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Request-Methods", "*");
+  response.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET");
+  response.setHeader("Access-Control-Allow-Headers", "*");
+  if (request.method === "OPTIONS") {
+    response.writeHead(200);
+    response.end();
   }
 
   let route = request.url;
@@ -28,14 +28,32 @@ const httpServer = http.createServer((request, response) => {
     if (route === "forum" && method === "GET") {
       response.setHeader("Conent-Type", "application/json");
       response.writeHead(200);
-      response.end(JSON.stringify({ post: 'En forum post' }));
-    } else if (route === 'posts' && method === 'GET') {
-      response.setHeader('Conent-Type', 'application/json');
-      response.writeHead(200);
-      response.end(JSON.stringify(posts));
+      response.end(JSON.stringify({ post: "En forum post" }));
+    } else if (route === "posts" && method === "GET") {
+      if (dynamicArguments.length === 0) {
+        response.setHeader("Conent-Type", "application/json");
+        response.writeHead(200);
+        response.end(JSON.stringify(posts));
+      } else {
+        const id = dynamicArguments[0];
+        const post = posts.filter(post => post.id == id);
+        response.setHeader("Conent-Type", "application/json");
+        response.writeHead(200);
+        response.end(JSON.stringify(post));
+      }
+    } else if (route === "posts" && method === "POST") {
+      const data = JSON.parse(payload);
+      const obj = {
+        title: data.title,
+        writtenBy: data.name,
+        content: data.content,
+        excerpt: data.content,
+        id: posts.length + 1
+      };
+      console.log(obj);
+      posts.push(obj);
     } else {
-      response.writeHead(404);
-      response.end('Sidan kunde inte hittas');
+      response.end("Sidan kunde inte hittas");
     }
   });
 });
